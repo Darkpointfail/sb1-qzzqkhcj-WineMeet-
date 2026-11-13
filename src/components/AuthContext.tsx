@@ -11,6 +11,21 @@ type AuthContextType = {
   userRole: 'admin' | 'sales_rep' | null;
 };
 
+// Mode démo : en développement (npm run dev), on saute la connexion et on
+// ouvre l'app directement avec un faux représentant (rôle sales_rep).
+// Pour revenir au vrai login, mettre VITE_DEMO_MODE=false dans .env.
+export const DEMO_MODE =
+  import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE !== 'false';
+
+const DEMO_USER = {
+  id: '00000000-0000-0000-0000-000000000001',
+  email: 'demo.representant@winemeet.local',
+  app_metadata: {},
+  user_metadata: { name: 'Représentant démo' },
+  aud: 'authenticated',
+  created_at: new Date(0).toISOString(),
+} as User;
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -20,6 +35,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<'admin' | 'sales_rep' | null>(null);
 
   useEffect(() => {
+    if (DEMO_MODE) {
+      setUser(DEMO_USER);
+      setUserRole('sales_rep');
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -62,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut() {
+    if (DEMO_MODE) return;
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   }
