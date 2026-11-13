@@ -12,7 +12,7 @@ import Availability from './pages/Availability';
 import Analytics from './pages/Analytics';
 import Account from './pages/Account';
 import Login from './pages/Login';
-import { useAuth } from './components/AuthContext';
+import { useAuth, DEMO_MODE } from './components/AuthContext';
 import { HeaderSearch } from './components/HeaderSearch';
 import { RoutesList } from './components/RoutesList';
 import { PrivateRoute } from './components/PrivateRoute';
@@ -213,7 +213,7 @@ export function App() {
         userRole === 'admin' ? <AdminNavigation /> : <SalesRepNavigation />
       )}
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={DEMO_MODE ? <Navigate to="/" replace /> : <Login />} />
         
         {/* Admin Routes */}
         <Route 
